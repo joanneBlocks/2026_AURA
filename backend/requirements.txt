@@ -3,3 +3,5 @@ numpy
 pandas
 supabase
 python-dotenv
+opencv-python
+mediapipe==0.10.9
