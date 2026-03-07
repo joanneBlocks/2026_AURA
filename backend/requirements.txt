@@ -1,0 +1,5 @@
+pynput
+numpy
+pandas
+supabase
+python-dotenv
