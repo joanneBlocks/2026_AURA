@@ -49,7 +49,7 @@ h1,h2,h3,h4 {{
 # TITLE
 # -------------------------
 
-st.title("AI Focus Control Center")
+st.title("AURA Focus Control Center")
 
 # -------------------------
 # VOICE ENGINE
