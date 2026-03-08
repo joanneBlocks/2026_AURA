@@ -25,10 +25,9 @@ AURORA = "#6D5EF6"
 SKY = "#38BDF8"
 MINT = "#34D399"
 AMBER = "#F59E0B"
-CLOUD = "#E5E7EB"
 
 # -------------------------
-# CUSTOM CSS (DARK DASHBOARD)
+# CSS
 # -------------------------
 
 st.markdown(f"""
@@ -45,11 +44,7 @@ h1,h2,h3,h4 {{
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# TITLE
-# -------------------------
-
-st.title("AURA Focus Control Center")
+st.title("AI Focus Control Center")
 
 # -------------------------
 # VOICE ENGINE
@@ -81,47 +76,9 @@ def listen():
 
 focus_score = np.random.randint(40,100)
 
-health_data = {
-    "Time": "34% ahead of schedule",
-    "Tasks": "8 tasks to be completed",
-    "Workload": "1 task overdue",
-    "Progress": "58% complete",
-    "Cost": "28% under budget"
-}
-
-task_data = pd.DataFrame({
-    "Status": ["Not Started","Complete","In Progress"],
-    "Count": [4,10,4]
-})
-
-progress_data = pd.DataFrame({
-    "Category":[
-        "Contracts",
-        "Design",
-        "Procurement",
-        "Construction",
-        "Post Construction",
-        "Project Closing"
-    ],
-    "Progress":[100,95,100,8,38,0]
-})
-
-time_data = pd.DataFrame({
-    "Type":["Planned Completion","Actual Completion","Ahead"],
-    "Value":[24,58,34]
-})
-
-cost_data = pd.DataFrame({
-    "Type":["Actual","Planned","Budget"],
-    "Value":[180,200,250]
-})
-
-workload_data = pd.DataFrame({
-    "Person":["Danny","Adam","Stephanie","Monica","John","Jennifer"],
-    "Completed":[1,3,2,2,1,2],
-    "Remaining":[2,2,2,1,0,0],
-    "Overdue":[0,0,0,1,0,0]
-})
+distraction_count = np.random.randint(0,10)
+off_screen_time = np.random.randint(1,20)
+group_engagement = np.random.randint(40,100)
 
 # -------------------------
 # FOCUS HISTORY
@@ -144,6 +101,23 @@ with open("focus_log.json","w") as f:
 timeline = pd.DataFrame(history)
 
 # -------------------------
+# ANALYTICS
+# -------------------------
+
+average_focus = int(timeline["focus"].mean())
+
+# longest focus streak (focus > 70)
+streak = 0
+max_streak = 0
+
+for value in timeline["focus"]:
+    if value > 70:
+        streak += 1
+        max_streak = max(max_streak, streak)
+    else:
+        streak = 0
+
+# -------------------------
 # FOCUS GAUGE
 # -------------------------
 
@@ -154,30 +128,27 @@ def focus_gauge(score):
         value=score,
         title={'text': "Focus Level"},
         gauge={
-            'axis': {'range': [0,100]},
-            'bar': {'color': AURORA},
-            'steps': [
-                {'range': [0,50], 'color': AMBER},
-                {'range': [50,80], 'color': SKY},
-                {'range': [80,100], 'color': MINT}
+            'axis': {'range':[0,100]},
+            'bar':{'color':AURORA},
+            'steps':[
+                {'range':[0,50],'color':AMBER},
+                {'range':[50,80],'color':SKY},
+                {'range':[80,100],'color':MINT}
             ]
         }
     ))
 
     fig.update_layout(
         height=320,
-
-        # remove black background
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-
         font=dict(color="white")
     )
 
     return fig
 
 # -------------------------
-# TOP CONTROL CENTER
+# CONTROL CENTER
 # -------------------------
 
 col1,col2,col3 = st.columns([2,2,1])
@@ -213,133 +184,22 @@ with col3:
         st.warning("Session Ended")
 
 # -------------------------
-# DASHBOARD ROW 1
+# FOCUS ANALYTICS
 # -------------------------
 
-col4,col5,col6 = st.columns(3)
+st.markdown("## Focus Analytics")
 
-with col4:
+a,b,c,d,e,f = st.columns(6)
 
-    st.subheader("Health")
-
-    for key,value in health_data.items():
-
-        st.write(f"**{key}**")
-        st.write(value)
-        st.write("---")
-
-with col5:
-
-    st.subheader("Tasks")
-
-    fig_tasks = go.Figure(data=[go.Pie(
-        labels=task_data["Status"],
-        values=task_data["Count"],
-        hole=.65,
-        marker=dict(colors=[SKY,MINT,AURORA])
-    )])
-
-    fig_tasks.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="white")
-    )
-
-    st.plotly_chart(fig_tasks,use_container_width=True)
-
-with col6:
-
-    st.subheader("Progress")
-
-    for i,row in progress_data.iterrows():
-
-        st.write(row["Category"])
-        st.progress(row["Progress"]/100)
+a.metric("Average Focus Score", average_focus)
+b.metric("Current Focus", focus_score)
+c.metric("Distractions", distraction_count)
+d.metric("Longest Focus Streak", max_streak)
+e.metric("Off-Screen Time (min)", off_screen_time)
+f.metric("Group Engagement", f"{group_engagement}%")
 
 # -------------------------
-# DASHBOARD ROW 2
-# -------------------------
-
-col7,col8,col9 = st.columns(3)
-
-with col7:
-
-    st.subheader("Time")
-
-    fig_time = go.Figure()
-
-    fig_time.add_trace(go.Bar(
-        y=time_data["Type"],
-        x=time_data["Value"],
-        orientation="h",
-        marker_color=SKY
-    ))
-
-    fig_time.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="white")
-    )
-
-    st.plotly_chart(fig_time,use_container_width=True)
-
-with col8:
-
-    st.subheader("Cost")
-
-    fig_cost = go.Figure()
-
-    fig_cost.add_trace(go.Bar(
-        x=cost_data["Type"],
-        y=cost_data["Value"],
-        marker_color=AURORA
-    ))
-
-    fig_cost.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="white")
-    )
-
-    st.plotly_chart(fig_cost,use_container_width=True)
-
-with col9:
-
-    st.subheader("Workload")
-
-    fig_work = go.Figure()
-
-    fig_work.add_trace(go.Bar(
-        y=workload_data["Person"],
-        x=workload_data["Completed"],
-        name="Completed",
-        orientation="h",
-        marker_color=MINT
-    ))
-
-    fig_work.add_trace(go.Bar(
-        y=workload_data["Person"],
-        x=workload_data["Remaining"],
-        name="Remaining",
-        orientation="h",
-        marker_color=SKY
-    ))
-
-    fig_work.add_trace(go.Bar(
-        y=workload_data["Person"],
-        x=workload_data["Overdue"],
-        name="Overdue",
-        orientation="h",
-        marker_color=AMBER
-    ))
-
-    fig_work.update_layout(
-        barmode="stack",
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="white")
-    )
-
-    st.plotly_chart(fig_work,use_container_width=True)
-
-# -------------------------
-# FOCUS TIMELINE
+# FOCUS TIMELINE GRAPH
 # -------------------------
 
 st.subheader("Focus Timeline")
@@ -354,10 +214,20 @@ fig_timeline.add_trace(go.Scatter(
 
 fig_timeline.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="white")
+    font=dict(color="white"),
+    xaxis_title="Session",
+    yaxis_title="Focus Score"
 )
 
 st.plotly_chart(fig_timeline,use_container_width=True)
+
+# -------------------------
+# GROUP ENGAGEMENT BAR
+# -------------------------
+
+st.subheader("Group Engagement Level")
+
+st.progress(group_engagement/100)
 
 # -------------------------
 # AI INSIGHTS
@@ -370,24 +240,24 @@ if focus_score > 80:
     st.success("""
 You are currently in **deep focus**.
 
-Best time for:
-• coding  
-• analysis  
+Best tasks:
+• coding
+• analysis
 • writing
 """)
 
 elif focus_score > 55:
 
     st.info("""
-You are focused but not in full flow state yet.
+Focus is stable but not yet optimal.
+Reducing distractions could improve productivity.
 """)
 
 else:
 
     st.warning("""
-Your focus level is dropping.
-
-Consider taking a break.
+Focus level is dropping.
+Consider taking a short break.
 """)
 
 # -------------------------
@@ -398,9 +268,9 @@ st.divider()
 
 st.header("AI Voice Assistant")
 
-col10,col11 = st.columns(2)
+col7,col8 = st.columns(2)
 
-with col10:
+with col7:
 
     st.subheader("Speech to Text")
 
@@ -409,7 +279,7 @@ with col10:
         text = listen()
         st.success(text)
 
-with col11:
+with col8:
 
     st.subheader("Text to Speech")
 
@@ -425,4 +295,4 @@ with col11:
 if focus_score < 50:
 
     st.warning("Attention: Focus level dropping.")
-    speak("Your focus level is dropping. Please refocus.")
+    speak("Your focus level is dropping.")
