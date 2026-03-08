@@ -4,3 +4,5 @@ __pycache__/
 venv/
 .env
 .DS_Store
+test_cadence_engine.py
+test_vision_engine.py
