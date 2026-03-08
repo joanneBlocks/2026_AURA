@@ -1,0 +1,10 @@
+streamlit
+plotly
+pandas
+numpy
+mediapipe
+opencv-python
+pynput
+speechrecognition
+pyttsx3
+pyaudio
