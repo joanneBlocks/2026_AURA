@@ -44,7 +44,7 @@ h1,h2,h3,h4 {{
 </style>
 """, unsafe_allow_html=True)
 
-st.title("AI Focus Control Center")
+st.title("AURA Focus Control Center")
 
 # -------------------------
 # VOICE ENGINE
