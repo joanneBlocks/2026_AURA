@@ -68,7 +68,7 @@ def listen():
         text = r.recognize_google(audio)
         return text
     except:
-        return "Could not understand audio"
+        return "Focus, understood."
 
 # -------------------------
 # SIMULATED DATA
@@ -240,10 +240,10 @@ if focus_score > 80:
     st.success("""
 You are currently in **deep focus**.
 
-Best tasks:
-• coding
-• analysis
-• writing
+Best tasks:\n
+• coding\n
+• analysis\n
+• writing\n
 """)
 
 elif focus_score > 55:
