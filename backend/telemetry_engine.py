@@ -2,6 +2,7 @@ import time
 import threading
 from pynput import keyboard, mouse
 import numpy as np
+from backend.state import state
 
 class TelemetryEngine:
     """
@@ -16,14 +17,15 @@ class TelemetryEngine:
         # We need a lock because pynput runs on a separate thread
         self.lock = threading.Lock()
 
-        # Listeners
-        self.kb_listener = keyboard.Listener(on_press=self._on_key_press)
-        self.mouse_listener = mouse.Listener(on_move=self._on_mouse_move, on_click=self._on_mouse_click)
 
     def start(self):
         """Starts the background listeners."""
         print("🚀 Telemetry Engine Started...")
         self.active = True
+        # Recreate listeners on every start
+        self.kb_listener = keyboard.Listener(on_press=self._on_key_press)
+        self.mouse_listener = mouse.Listener(on_move=self._on_mouse_move, on_click=self._on_mouse_click)
+       
         self.kb_listener.start()
         self.mouse_listener.start()
 
@@ -32,6 +34,10 @@ class TelemetryEngine:
         self.active = False
         self.kb_listener.stop()
         self.mouse_listener.stop()
+        # Clear stored events on session end
+        with self.lock:
+            self.keystrokes = []
+            self.mouse_events = []
         print("🛑 Telemetry Engine Stopped.")
 
     def _on_key_press(self, key):
@@ -83,15 +89,25 @@ class TelemetryEngine:
 
         # 3. Determine "State" based on thresholds
         if actions_per_sec > 2.5:
-            state = "🔥 High Flow"
+            flow_state = "🔥 High Flow"
         elif actions_per_sec > 0.5:
-            state = "✅ Active"
+            flow_state = "✅ Active"
         else:
-            state = "💤 Idle"
+            flow_state = "💤 Idle"
+
+        # Update the Global State
+        state.wpm = round(wpm, 1)
+        state.actions_per_sec = round(actions_per_sec, 2)
+        
+        # Simple logic: If active, boost focus. If idle, decay focus.
+        if actions_per_sec > 0.5:
+            state.focus_score = min(100, state.focus_score + 1)
+        else:
+            state.focus_score = max(0, state.focus_score - 0.5)
 
         return {
             "wpm": round(wpm, 1),
             "actions_per_sec": round(actions_per_sec, 2),
-            "state": state,
+            "flow_state": flow_state,
             "timestamp": now
         }

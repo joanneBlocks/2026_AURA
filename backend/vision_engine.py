@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import math
 import time
+from backend.state import state
 
 class VisionEngine:
     def __init__(self):
@@ -89,6 +90,13 @@ class VisionEngine:
             
             # Normalize to 0.0 - 1.0
             final_score = max(0, score) / 100.0
+
+            # Update Global State
+            state.is_distracted = is_looking_away
+            
+            # If distracted, heavy penalty on the global score
+            if is_looking_away:
+                state.focus_score = max(0, state.focus_score - 2)
 
             return {
                 "focus_score": final_score, 
