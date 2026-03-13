@@ -8,3 +8,7 @@ pynput
 speechrecognition
 pyttsx3
 pyaudio
+supabase
+python-dotenv
+mediapipe==0.10.9
+gTTS
